@@ -1,6 +1,6 @@
 # Hybrid Coding Skill
 
-[![skills.sh](https://skills.sh/b/RentnerKev/Hybrid-Coding-Skill)](https://skills.sh/RentnerKev/Hybrid-Coding-Skill)
+<!-- [![skills.sh](https://skills.sh/b/RentnerKev/Hybrid-Coding-Skill)](https://skills.sh/RentnerKev/Hybrid-Coding-Skill) -->
 
 Cost-efficient multi-agent coding orchestration for Codex.
 
