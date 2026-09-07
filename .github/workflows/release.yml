@@ -1,65 +1,56 @@
 name: Release
 
+run-name: Release ${{ github.event.release.tag_name }}
+
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Release version (e.g. 1.0.0)"
-        required: true
-        type: string
+  release:
+    types: [published]
 
 permissions:
-  contents: write
-
-concurrency:
-  group: release
-  cancel-in-progress: false
+  contents: read
 
 jobs:
-  release:
-    name: Create Release
+  validate:
+    name: Validate Skill Release
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout released version
         uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
 
-      - name: Validate branch
+      - name: Validate release tag
         shell: bash
-        run: |
-          if [[ "${GITHUB_REF_NAME}" != "main" ]]; then
-            echo "::error::Releases must be created from main."
-            exit 1
-          fi
-
-      - name: Validate version
-        id: version
-        shell: bash
-        run: |
-          VERSION="${{ inputs.version }}"
-
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Version must use SemVer format, e.g. 1.0.0."
-            exit 1
-          fi
-
-          TAG="v${VERSION}"
-
-          if git rev-parse "$TAG" >/dev/null 2>&1; then
-            echo "::error::Tag $TAG already exists."
-            exit 1
-          fi
-
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub release
         env:
-          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tag must use SemVer format, e.g. v1.0.0"
+            exit 1
+          fi
+
+          echo "Release version: ${TAG#v}"
+
+      - name: Validate required files
         shell: bash
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" \
-            --target "${GITHUB_SHA}" \
-            --title "${{ steps.version.outputs.tag }}" \
-            --generate-notes
+          test -f SKILL.md || {
+            echo "::error::SKILL.md is missing"
+            exit 1
+          }
+
+          test -f README.md || {
+            echo "::error::README.md is missing"
+            exit 1
+          }
+
+          test -f LICENSE || {
+            echo "::error::LICENSE is missing"
+            exit 1
+          }
+
+      - name: Validate skill discovery
+        shell: bash
+        run: |
+          npx -y skills@latest add . --list
