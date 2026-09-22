@@ -1,49 +1,47 @@
 ---
 name: hybrid-coding
-description: Use for coding tasks in Codex that benefit from cost-efficient multi-agent exploration, implementation, debugging, or review. Keep GPT-6 Astra MEDIUM as the lead, delegate bounded parallel work to GPT-5.6 Luna, and use GPT-5.6 Terra only for difficult specialist escalation.
+description: Use for coding tasks in Codex that benefit from selective multi-agent exploration, implementation, debugging, or review. Keep GPT-6 Sol MAX as the persistent lead, route bounded work to GPT-6 Luna HIGH/MAX, and reserve GPT-6 Sol MAX specialists for difficult problems.
 ---
 
 # Hybrid Coding
 
-Optimize coding quality and token/credit efficiency with one persistent lead and useful, bounded workers. Keep global context and decisions with GPT-6 Astra MEDIUM; delegate detail work when its value exceeds coordination cost.
+Keep GPT-6 Sol MAX responsible for the whole coding task: repository context, orchestration, implementation decisions, integration, validation, and final review. Use GPT-6 Luna workers only when a bounded assignment adds value beyond its coordination cost. An additional GPT-6 Sol MAX worker is a rare specialist, never a replacement lead.
 
 ## Model strategy
 
 | Assignment | Preferred model | Reasoning | Selection rule |
 | --- | --- | --- | --- |
-| Lead and integration | GPT-6 Astra | MEDIUM | Default for every task size |
-| Exploration and mechanical work | GPT-5.6 Luna | HIGH | File discovery, call sites, tests, dependencies, simple checks, small bounded edits |
-| Bounded deep analysis | GPT-5.6 Luna | MAX | Bug analysis, implementation planning, edge cases, regressions, focused review |
-| Difficult specialist work | GPT-5.6 Terra | MAX | Concrete concurrency, consistency, architecture, or other deep problem that warrants escalation |
+| Persistent lead, integration, final decisions | GPT-6 Sol | MAX | Keep ownership for every task size |
+| Repository exploration and mechanical analysis | GPT-6 Luna | HIGH | File and call-site discovery, tests, dependencies, configuration, existing patterns |
+| Bounded deep analysis and review | GPT-6 Luna | MAX | Bug investigation, planning, API contracts, edge cases, regressions, debugging, adversarial review |
+| Difficult specialist question | GPT-6 Sol | MAX | Complex concurrency, database behavior, architecture, cross-module invariants, subtle state or performance problems, or a high-risk second opinion when Luna is insufficient |
 
-Use the runtime's supported model selectors (for example, `gpt-6-astra`, `gpt-5.6-luna`, and `gpt-5.6-terra`) and effort controls. These are routing preferences, not configuration installed by this skill. Respect explicit user choices and actual tool capabilities. Do not claim to change the active lead or reasoning if no supported control exists. If a preferred worker is unavailable, disclose the limitation and use the least costly adequate available option; work locally if delegation is unavailable or unhelpful.
+Use supported runtime selectors such as `gpt-6-sol` and `gpt-6-luna` with the stated reasoning effort. These are routing instructions, not configuration installed by this skill. For the documented setup, start the active Codex task with GPT-6 Sol at MAX; do not claim to change the active model or effort without a supported control. Respect explicit user model choices and actual runtime capabilities. If a preferred model or delegation is unavailable, explain the material limitation and continue useful work locally where possible. Do not silently substitute another model as the normal strategy.
 
-Keep Terra at zero by default. Use a targeted Terra MAX worker only for a concrete difficult question, such as unresolved Luna findings, a race condition, or subtle transaction invariants. Do not route routine exploration, CRUD, or ordinary review to Terra.
-
-Escalate the active Astra lead from MEDIUM to HIGH, then XHIGH, then MAX only when an important unresolved decision exceeds the current effort. Task size alone is not a trigger. Do not spawn another Astra as a substitute for supported lead controls.
+The Sol lead stays at MAX even for a trivial task. Control cost by reducing worker use, assigning mechanical work to Luna HIGH, assigning deeper bounded reasoning to Luna MAX, and adding a Sol MAX specialist only for a concrete difficult question. File count and task size alone do not justify a specialist. Do not create redundant workers because Luna is inexpensive.
 
 ## Size and delegation
 
-| Size | Examples | Luna worker guide |
+| Size | Examples | Typical guidance for the whole task |
 | --- | --- | --- |
-| Trivial | Rename, typo, small CSS or config fix | Usually 0; optionally 1 HIGH |
-| Small | Isolated bugfix, small component or endpoint | 1–3, mainly HIGH; MAX for real analysis |
-| Medium | Feature, CRUD, module refactor, API + UI + tests | Approximately 3–6, mixing HIGH and MAX |
-| Large | Repository-wide refactor, new subsystem, complex regression | Approximately 6–10, with independent exploration and review |
+| Trivial | Rename, typo, small CSS or config fix, tiny one-file edit | Usually no worker; optionally one Luna HIGH for useful discovery |
+| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 Luna HIGH/MAX workers; Sol specialist only if unexpectedly difficult |
+| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful Luna HIGH/MAX scopes; optional Sol MAX specialist |
+| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful Luna HIGH/MAX scopes; optional 1–2 Sol MAX specialists |
 
-These are planning ranges with upper bounds, never spawn quotas. Use fewer workers when scopes do not separate. Count workers across the task, respect the runtime's concurrency limit, and schedule useful work in waves where necessary. Prefer independent Luna scopes before expensive escalation; stop spawning once further work is unlikely to change the outcome.
+These ranges are guidelines, never quotas or minimums. Use fewer workers when scopes do not separate. Counts cover the entire task, not simultaneous agents; follow runtime concurrency limits and run dependent work in sequence. Stop delegating when another worker is unlikely to change the decision or evidence.
 
 ## Execution
 
-1. Read the request, current Git state, and applicable repository instructions, including `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, README rules, and established code patterns. Preserve user changes and remain within the authorized scope.
-2. Classify size, risk, and parallelism. Keep one coherent plan. Do trivial work directly; delegate independent read/search/analysis tasks where useful.
-3. Give every worker an exact goal, scope, relevant files or symbols, edit permissions, expected result, and stopping condition. Request concise evidence with paths and symbols, checks performed, and explicit uncertainty. Prohibit scope expansion.
-4. Keep concurrent writers on disjoint files or modules. Gather cross-cutting findings before implementation decisions. The lead implements or coordinates implementation and owns integration.
-5. Synthesize findings against repository evidence. Resolve disagreements with a narrow follow-up, reproduction, or justified specialist; do not treat worker agreement as proof. Reuse existing workers and findings when practical.
-6. Run relevant existing tests, lint, typecheck, and build where available. Discover real commands from project tooling. Fix failures caused by the change and distinguish pre-existing failures or unavailable checks.
-7. Review the final diff for correctness, regressions, scope, accidental private data, and unnecessary complexity. Use a focused independent Luna MAX review when risk justifies it. Report the outcome, verification, and remaining limitations.
+1. Understand the request and current Git state. Read applicable `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, project documentation, and relevant code conventions. Explicit user instructions and repository constraints govern the work; preserve user changes and scope.
+2. Decide whether delegation adds value. Keep the global plan and repository context with the Sol lead. Perform trivial work directly when discovery is unnecessary.
+3. Give each worker a narrow objective, relevant context and files, edit permission or read-only boundary, expected output, and stopping condition. Ask for concise evidence with paths or symbols, checks performed, and uncertainty. Avoid duplicate assignments except for a deliberate independent second opinion.
+4. Parallelize independent searches, analyses, and disjoint edits where useful. Keep dependent steps sequential. Assign exclusive file or module ownership to concurrent writers; the lead implements directly where appropriate, coordinates delegated edits, and integrates the result.
+5. Verify worker findings against repository evidence before applying them. Resolve conflicts through inspection, reproduction, or a narrow follow-up. Use an additional Sol MAX specialist only when a concrete difficult question remains beyond Luna's investigation; the lead makes the final decision.
+6. Run relevant existing tests, lint, type checks, builds, and repository-specific validation. Discover the commands from project tooling; fix failures caused by the change and distinguish pre-existing or unavailable checks.
+7. Review the complete diff for correctness, regressions, unrelated changes, private data, and unnecessary complexity. Use a focused Luna MAX independent review when risk warrants it. Report the result, validation, and material limitations.
 
 ## References
 
-- Read [orchestration](references/orchestration.md) when planning multiple workers, resolving conflicting findings, or considering escalation.
-- Read [worker roles](references/roles.md) when selecting a role or drafting a bounded assignment.
+- Read [orchestration](references/orchestration.md) when planning multiple workers, integrating conflicting findings, or considering a Sol specialist.
+- Read [worker roles](references/roles.md) when choosing roles or writing bounded worker assignments.

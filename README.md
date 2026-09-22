@@ -4,11 +4,9 @@
 
 Cost-efficient multi-agent coding orchestration for Codex.
 
-**GPT-6 Astra MEDIUM** acts as the persistent lead and decision-maker, while cheaper **GPT-5.6 Luna** workers handle parallel exploration, implementation analysis, testing, and review. **GPT-5.6 Terra MAX** is reserved for difficult specialist problems.
+**GPT-6 Sol MAX** owns the task as the persistent lead and final decision-maker. **GPT-6 Luna HIGH/MAX** workers handle useful, bounded exploration, analysis, testing, debugging, and review. Additional **GPT-6 Sol MAX** specialists are reserved for genuinely difficult questions.
 
-The goal is simple:
-
-> High coding quality without wasting expensive reasoning and context tokens.
+The goal is high coding quality without unnecessary worker or context cost.
 
 ## Installation
 
@@ -38,11 +36,11 @@ bunx skills check -g
 
 ## Usage
 
-Select the following model in Codex:
+Select the active model and reasoning level in Codex:
 
 ```text
-GPT-6 Astra
-Reasoning: Medium
+GPT-6 Sol
+Reasoning: MAX
 ```
 
 Then invoke the skill with your task:
@@ -54,201 +52,95 @@ Implement the requested feature, preserve the existing architecture,
 run the relevant checks, and keep the change focused.
 ```
 
-For most tasks, **Astra MEDIUM should remain the lead**. The skill delegates bounded work to Luna workers and only escalates when additional reasoning strength is justified.
+GPT-6 Sol MAX remains the lead throughout the task. The skill can guide delegation but cannot change the active Codex model or unlock unavailable models or agents.
 
 ## Why this setup?
 
-Using the strongest model for every subtask is usually unnecessary.
+Sol provides strong repository-level coding, integration, and final judgment. Luna is capable of most bounded worker tasks at much lower cost, so exploration and review can run in parallel when their findings will help. A second Sol worker is useful only when a specific hard problem remains after focused Luna work.
 
-Repository exploration, call-site discovery, test analysis, dependency checks, bounded implementation work, and many reviews can be handled efficiently by Luna workers.
-
-The lead therefore keeps the important global context while workers receive smaller, focused scopes.
+Cost control comes from choosing useful scopes and the right worker effort, not from lowering the persistent lead's reasoning level. A larger file count does not itself call for a stronger worker.
 
 ```text
-GPT-6 Astra MEDIUM
+GPT-6 Sol MAX (persistent lead)
         │
-        ├── Luna HIGH
+        ├── GPT-6 Luna HIGH
         │   ├── repository exploration
         │   ├── call-site discovery
         │   ├── test discovery
         │   └── dependency analysis
         │
-        ├── Luna MAX
-        │   ├── bug analysis
+        ├── GPT-6 Luna MAX
+        │   ├── bug investigation
         │   ├── implementation planning
         │   ├── edge cases
-        │   └── regression review
+        │   ├── regression review
+        │   └── adversarial review
         │
-        └── Terra MAX
-            └── difficult specialist problems only
+        └── GPT-6 Sol MAX specialist (only when justified)
+            ├── architecture
+            ├── concurrency
+            ├── database behavior
+            └── unresolved hard problems
 ```
 
-Worker counts are guidelines, not quotas. The skill should only spawn agents when parallelization is actually useful.
+The branches show available roles, not agents that must all be started. Independent scopes may run in parallel; dependent work waits for its inputs.
 
 ## Model strategy
 
-| Responsibility                                            | Model         | Reasoning |
-| --------------------------------------------------------- | ------------- | --------- |
-| Persistent lead, orchestration, final decisions           | GPT-6 Astra   | MEDIUM    |
-| Repository exploration and mechanical analysis            | GPT-5.6 Luna  | HIGH      |
-| Bug analysis, implementation planning, edge cases, review | GPT-5.6 Luna  | MAX       |
-| Difficult concurrency, database, or architecture problems | GPT-5.6 Terra | MAX       |
+| Responsibility | Model | Reasoning |
+| --- | --- | --- |
+| Persistent lead, orchestration, integration, final decisions | GPT-6 Sol | MAX |
+| Repository exploration and mechanical analysis | GPT-6 Luna | HIGH |
+| Bug analysis, implementation planning, edge cases, review | GPT-6 Luna | MAX |
+| Difficult concurrency, database, architecture, or unresolved specialist problems | GPT-6 Sol | MAX |
 
-### Astra escalation
+### Reasoning and specialist escalation
 
-The lead should not automatically increase reasoning effort because a task is large.
+Keep the Sol lead at MAX for every task size. For simple tasks, use fewer workers. Choose Luna HIGH for inexpensive mechanical work and Luna MAX when deeper bounded reasoning could change the outcome.
 
-Escalation is reserved for unresolved reasoning problems:
-
-```text
-MEDIUM
-  ↓
-HIGH
-  ↓
-XHIGH
-  ↓
-MAX
-```
-
-Prefer adding useful Luna scopes before increasing Astra reasoning effort.
+An additional Sol MAX specialist needs a concrete difficult question: for example, a subtle race, transaction invariant, architecture decision, cross-module state problem, difficult performance issue, or independent second opinion on a high-risk change. The lead decides when Luna findings are insufficient, verifies the specialist's evidence, and retains final ownership.
 
 ## Task sizing
 
-### Trivial
+Worker counts are planning guidance across the whole task, never quotas or simultaneous-worker targets. Use fewer when the work does not separate into valuable independent scopes.
 
-Examples:
-
-* Rename
-* Typo
-* Small CSS fix
-* Small configuration change
-* Obvious one-file edit
-
-Typical delegation:
-
-```text
-Astra MEDIUM
-└── 0–1 Luna HIGH
-```
-
-### Small
-
-Examples:
-
-* Isolated bugfix
-* Small component
-* Small endpoint
-* Focused test change
-
-Typical delegation:
-
-```text
-Astra MEDIUM
-├── 1–3 Luna HIGH
-└── optional Luna MAX
-```
-
-### Medium
-
-Examples:
-
-* Feature implementation
-* CRUD flow
-* Module refactor
-* API + UI + tests
-* Several related files
-
-Typical delegation:
-
-```text
-Astra MEDIUM
-├── 3–6 Luna HIGH/MAX
-└── Terra only if justified
-```
-
-### Large
-
-Examples:
-
-* Broad refactor
-* Repository-wide migration
-* New subsystem
-* Complex regression
-* Cross-module architecture change
-
-Typical delegation:
-
-```text
-Astra MEDIUM
-├── approximately 6–10 Luna HIGH/MAX
-├── optional Terra MAX specialist
-└── Astra escalation only when necessary
-```
-
-The numbers refer to the whole task and do not imply that all workers should run simultaneously.
+| Size | Examples | Typical delegation |
+| --- | --- | --- |
+| Trivial | Rename, typo, small CSS fix, obvious config change, tiny one-file edit | Usually no worker; optionally one GPT-6 Luna HIGH for useful discovery |
+| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 GPT-6 Luna HIGH/MAX workers; Sol specialist only if unexpectedly difficult |
+| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful GPT-6 Luna HIGH/MAX scopes; optional Sol MAX specialist |
+| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful GPT-6 Luna HIGH/MAX scopes; optional 1–2 Sol MAX specialists |
 
 ## Worker roles
 
-The skill includes reusable worker roles for common coding tasks:
+The skill includes reusable roles, selected only when relevant:
 
-* `repository-explorer`
-* `call-site-analyzer`
-* `test-analyzer`
-* `dependency-analyzer`
-* `implementation-planner`
-* `bug-investigator`
-* `edge-case-reviewer`
-* `regression-reviewer`
-* `adversarial-reviewer`
-* `concurrency-specialist`
-* `database-specialist`
+| Recommended route | Roles |
+| --- | --- |
+| GPT-6 Luna HIGH | `repository-explorer`, `call-site-analyzer`, `test-analyzer`, `dependency-analyzer` |
+| GPT-6 Luna MAX | `implementation-planner`, `bug-investigator`, `edge-case-reviewer`, `regression-reviewer`, `adversarial-reviewer` |
+| GPT-6 Sol MAX, when justified | `concurrency-specialist`, `database-specialist`, `architecture-specialist` |
+| GPT-6 Luna HIGH or MAX, according to difficulty | `bounded-implementer` |
 
-Each worker receives:
-
-* a clearly bounded scope
-* a concrete objective
-* expected output
-* only the context required for its task
-
-Workers should not duplicate each other's work unless an independent second opinion is intentionally requested.
+Each worker gets a narrow scope, relevant context, a clear objective, allowed edits, and an expected output. Do not duplicate assignments unless an independent second opinion is intentionally useful. See [worker roles](references/roles.md) for bounded role definitions.
 
 ## Orchestration principles
 
-The lead should:
+The persistent lead should:
 
-1. Understand the task and repository constraints.
-2. Respect existing project instructions and conventions.
-3. Determine whether delegation is useful.
-4. Assign independent scopes in parallel where possible.
-5. Keep expensive models focused on genuinely difficult reasoning.
-6. Integrate worker findings into one coherent implementation.
-7. Run relevant tests, linting, type checks, and builds.
-8. Review the final diff for regressions and unnecessary changes.
-9. Keep the implementation focused on the requested scope.
+1. Understand the task, current repository state, and applicable instructions.
+2. Respect existing project conventions and user requirements.
+3. Decide whether delegation adds value and parallelize independent scopes.
+4. Verify worker findings against the repository and resolve conflicting evidence.
+5. Integrate all work into one coherent implementation and make final decisions.
+6. Run relevant tests, linting, type checks, builds, and repository-specific validation.
+7. Review the complete diff for regressions and unrelated changes.
 
-Existing repository instructions take precedence, including:
-
-* `AGENTS.md`
-* `CLAUDE.md`
-* `CONTRIBUTING.md`
-* project-specific documentation
-* user-provided requirements
+Applicable instructions include `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, project documentation, and explicit user requirements. See [orchestration](references/orchestration.md) for detailed routing and integration guidance.
 
 ## Important
 
-This skill provides orchestration instructions.
-
-It does **not**:
-
-* install or unlock models
-* change your Codex subscription
-* enable unavailable multi-agent functionality
-* automatically change the active lead model
-* bypass runtime concurrency limits
-
-Model availability and agent delegation depend on the Codex environment being used.
-
-Explicit user instructions always take precedence.
+This skill provides orchestration instructions. It does not install models, change a subscription, enable unavailable multi-agent functionality, change the active model automatically, or bypass runtime concurrency limits. Model availability and delegation depend on the Codex environment. Explicit user instructions take precedence.
 
 ## Local validation
 

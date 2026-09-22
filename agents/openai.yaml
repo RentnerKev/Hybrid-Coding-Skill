@@ -1,4 +1,4 @@
 interface:
   display_name: "Hybrid Coding"
-  short_description: "Cost-efficient coding with Astra and Luna workers"
-  default_prompt: "Use $hybrid-coding to implement the requested change, preserve project conventions, and run relevant checks with focused delegation."
+  short_description: "Cost-efficient coding with GPT-6 Sol and Luna"
+  default_prompt: "Use $hybrid-coding with GPT-6 Sol MAX as the lead, delegate bounded work when useful, preserve project conventions, and run relevant checks."

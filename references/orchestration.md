@@ -1,48 +1,42 @@
 # Orchestration
 
-Use a strong lead and narrowly scoped workers. The lead owns the user request, repository context, architecture, delegation, integration, verification, and final response. Workers supply bounded evidence or implementation help; the lead remains responsible for judging their results.
+GPT-6 Sol MAX is the persistent lead. It owns the user request, repository constraints and conventions, architecture, delegation, integration, validation, and final decisions. Workers answer bounded questions or make isolated edits; the lead checks their evidence and remains responsible for the outcome.
 
 ## Model routing
 
-The default lead is Astra at MEDIUM reasoning. Start every task there. Astra MEDIUM should classify the work, inspect enough context to plan safely, decide whether delegation adds value, assign independent scopes, synthesize findings, integrate changes, and review the final result.
+Use GPT-6 Luna HIGH for inexpensive read-heavy or mechanical scopes: repository exploration, file and symbol discovery, call-site mapping, dependency tracing, configuration inspection, existing-pattern discovery, test discovery, and simple checks.
 
-Use Luna at HIGH for read-heavy and mechanically bounded work: repository exploration, symbol and call-site mapping, dependency tracing, configuration and pattern discovery, test discovery, API or type inventory, documentation lookup within the project, and simple regression checks. Use Luna at MAX for bounded work where deeper reasoning can change the result: root-cause analysis, edge cases, regression review, implementation-path comparison, adversarial review, test-plan design, migration analysis, or a tightly scoped implementation.
+Use GPT-6 Luna MAX when bounded reasoning matters: root-cause investigation, API contract analysis, implementation planning, edge cases, regression or adversarial review, test-gap analysis, migration impact, focused debugging, and isolated implementation analysis.
 
-Use Terra at MAX only for a concrete difficult subproblem. Valid triggers include unresolved disagreement between independent Luna analyses, an ambiguous root cause after focused investigation, an invariant spanning several modules, difficult transaction or consistency reasoning, concurrency or race-condition analysis, a risky implementation needing an independent deep review, or an algorithmic or compiler problem beyond Luna's confidence. Default Terra usage is zero; target at most one worker. Do not use Terra for routine exploration, formatting, test discovery, straightforward CRUD, or ordinary frontend work.
+Use an additional GPT-6 Sol MAX worker only for a concrete difficult specialist question that Luna cannot adequately resolve. Examples include complex concurrency, non-obvious database transactions, architecture decisions, cross-module invariants, subtle state management, difficult performance behavior, an unresolved issue after focused Luna investigation, or an independent second opinion on a high-risk change. The lead decides whether the specialist is justified, gives it a narrow scope, verifies its findings, and retains global ownership. Do not use a Sol specialist for ordinary exploration, CRUD, formatting, or routine review. Task size and file count alone are not triggers.
 
-Increase the lead's Astra reasoning only when MEDIUM cannot safely resolve an important, high-impact decision. Escalate progressively from HIGH to XHIGH to MAX. The trigger is unresolved reasoning risk, such as architecture, security, concurrency, a major migration, conflicting evidence, or an irreversible choice; task size alone is not a reason to escalate. Model and effort selections are preferences subject to the runtime's available models and controls. Never claim to have switched the active lead without a supported control. If a preferred selection is unavailable, use the least costly adequate supported route and state any material limitation. Explicit user choices take precedence.
+The active Sol lead stays at MAX, including on trivial tasks. Lower worker count for simple work rather than lowering lead effort. Use the runtime's supported `gpt-6-sol` and `gpt-6-luna` selectors and reasoning controls; do not claim to change an active model without a supported control. Respect explicit user choices. If the intended model or delegation is unavailable, state the material limitation and continue useful work locally where possible.
 
 ## Delegation guide
 
-These are ceilings and planning guidance, not quotas. Counts are for the whole task, not simultaneous workers, and always yield to the runtime concurrency limit.
+The ranges are planning guidance for the whole task, never quotas, minimums, or simultaneous worker targets. Respect the runtime concurrency limit and schedule dependent work in waves.
 
-| Task size | Lead | Typical Luna use | Terra |
+| Task size | Lead | Typical Luna use | Additional Sol MAX specialists |
 | --- | --- | --- | --- |
-| Trivial | Astra MEDIUM | 0; optionally 1 HIGH verification worker when regression risk exists | 0 |
-| Small | Astra MEDIUM | 1–3 workers, usually HIGH; MAX only for one bounded analytical question | 0 |
-| Medium | Astra MEDIUM | Approximately 3–6 workers, commonly 2–3 HIGH plus 1–2 MAX | 0 by default; at most 1 after a concrete trigger |
-| Large | Astra MEDIUM | Approximately 6–10 workers, commonly 3–4 HIGH plus 3–4 MAX | 0 by default; at most 1 after a concrete trigger |
+| Trivial | GPT-6 Sol MAX | Usually none; optionally one HIGH worker for useful discovery | Usually none |
+| Small | GPT-6 Sol MAX | Roughly 1–3 HIGH/MAX workers if scopes separate | Only if unexpectedly difficult |
+| Medium | GPT-6 Sol MAX | Roughly 3–6 useful HIGH/MAX scopes | Optional, after a concrete trigger |
+| Large | GPT-6 Sol MAX | Roughly 6–10 useful HIGH/MAX scopes | Optional 1–2, each with a distinct difficult question |
 
-Do not spawn merely to reach a count. A poorly parallelizable deep task usually needs Astra MEDIUM, one justified Terra MAX specialist, and a small number of Luna evidence or verification workers. Stop spawning when another worker is unlikely to change the decision or evidence.
+Do not spawn merely to reach a count or because Luna is inexpensive. A hard but poorly parallelizable task can have fewer workers than a straightforward migration with independent discovery scopes. Stop when another worker is unlikely to change the decision or evidence.
 
-Give each worker an independent question and explicit boundaries. Prefer read-only investigations before implementation. For implementation work, assign exact file or module ownership and never allow concurrent edits to the same files unless the lead has deliberately planned reconciliation. Do not duplicate work except for an intentional independent review. Prompts should state the goal, scope, whether edits are allowed, relevant files, expected evidence, and that uncertainty must be reported instead of guessed.
+Give each worker a precise objective, bounded files or symbols, relevant repository constraints, whether edits are allowed, expected output, and a stopping condition. Ask for paths and symbols supporting findings, checks performed, assumptions, and unresolved uncertainty. Send the context needed for the assignment, not the entire repository or conversation.
 
-Run independent reads, searches, and analyses in parallel within the available slots. Keep dependent work sequential: a reviewer needs the proposed implementation, and an implementer needs any unresolved contract decision settled first. The lead should continue useful independent work while workers run.
+Run independent reads, searches, and analyses in parallel when useful. Keep dependent work sequential: an implementer needs settled contracts, and a reviewer needs the actual implementation. For concurrent editing, assign disjoint files or modules and integrate through the lead. Do not duplicate work except for an intentionally independent second opinion.
 
-For example, a medium feature may start with one Luna HIGH mapping project patterns and another locating callers and tests. After synthesis, assign disjoint implementation work where useful and use Luna MAX to review the resulting edge cases. Do not launch every role in the catalog for each feature.
+For example, a medium feature may start with one Luna HIGH worker locating project patterns and another mapping callers and tests. After the lead compares findings and decides the implementation, a bounded implementer may own isolated files. A Luna MAX worker can then inspect edge cases in the resulting diff. The roles are options, not a checklist.
 
-## Token and credit discipline
+## Integration and verification
 
-Keep the full task context with the lead. Send workers only the relevant constraints, files, and questions; do not copy the full repository or conversation into every prompt. Ask for findings, supporting locations, checks, and unresolved questions rather than long investigation transcripts.
+The lead checks worker claims against the cited repository evidence before acting. Resolve disagreements by reading the relevant code, reproducing behavior, or requesting a narrow follow-up. Worker consensus is not proof. Escalate only the remaining difficult question to a Sol MAX specialist; the lead makes the final decision.
 
-Reuse findings and existing workers for narrow follow-ups. Use HIGH when search or mechanical work answers the question and MAX when deeper reasoning could change the result. Prefer independent Luna scopes over expensive parallel workers when the task separates cleanly. Stop obsolete investigations and avoid repeating successful checks unless changes or new evidence justify it. Judge efficiency by useful decisions and verified outcomes, not agent count; no fixed savings are guaranteed.
+Use existing repository conventions and follow explicit user instructions plus applicable `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, and project documentation. Keep the implementation within the requested scope and preserve user changes.
 
-## Synthesis and verification
+The lead implements directly where appropriate, integrates delegated changes, and runs relevant project tests, lint, type checks, builds, and repository-specific validation. Discover real commands from scripts, CI, or project docs. Fix failures caused by the work and distinguish pre-existing failures or unavailable checks. Avoid repeating successful checks unless code or evidence changed.
 
-Collect the relevant findings before escalating to a more expensive worker. The lead should compare evidence, record meaningful uncertainty, choose one coherent implementation path, and explain any unresolved limitation. Workers should report concise evidence with paths and symbols rather than broad summaries.
-
-Resolve conflicting findings by inspecting the cited code or reproducing the behavior, then assign a narrow follow-up if needed. Escalate to Terra only when the remaining uncertainty is a difficult specialist question. The lead owns the decision and must not accept a majority vote as verification.
-
-The lead integrates all changes and runs the project's existing relevant tests, lint, typecheck, and build where available. Inspect project scripts, task runners, CI configuration, or tooling before selecting checks; do not invent commands. Fix failures caused by the change, rerun affected checks, and distinguish pre-existing failures from unavailable validation.
-
-Finish with a focused diff review for correctness, regressions, security issues, scope creep, private data, and unnecessary complexity. For meaningful behavioral risk, give a Luna MAX reviewer the actual diff and affected contracts; trivial edits normally need only the lead's review. Resolve actionable findings and verify resulting edits before reporting completion. A worker's passing check is evidence, not a substitute for the lead's final review.
+Finish by inspecting the complete diff for correctness, regressions, unrelated edits, private data, and unnecessary complexity. Use an independent Luna MAX review when meaningful behavioral risk justifies it. Resolve actionable findings and verify subsequent edits before reporting the result and limitations.
