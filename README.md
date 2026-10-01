@@ -4,7 +4,7 @@
 
 Cost-efficient multi-agent coding orchestration for Codex.
 
-**GPT-6 Sol MAX** owns the task as the persistent lead and final decision-maker. **GPT-6 Luna HIGH/MAX** workers handle useful, bounded exploration, analysis, testing, debugging, and review. Additional **GPT-6 Sol MAX** specialists are reserved for genuinely difficult questions.
+**GPT-6.1 Sol MAX** owns the task as the persistent lead and final decision-maker. **GPT-6 Luna HIGH** workers handle useful discovery and settled mechanical work. **GPT-6.1 Sol MEDIUM** workers handle substantive implementation, analysis, debugging, and review. Additional **GPT-6.1 Sol HIGH/MAX** specialists are reserved for concrete difficult questions or high-risk second opinions.
 
 The goal is high coding quality without unnecessary worker or context cost.
 
@@ -39,7 +39,7 @@ bunx skills check -g
 Select the active model and reasoning level in Codex:
 
 ```text
-GPT-6 Sol
+GPT-6.1 Sol
 Reasoning: MAX
 ```
 
@@ -52,31 +52,33 @@ Implement the requested feature, preserve the existing architecture,
 run the relevant checks, and keep the change focused.
 ```
 
-GPT-6 Sol MAX remains the lead throughout the task. The skill can guide delegation but cannot change the active Codex model or unlock unavailable models or agents.
+GPT-6.1 Sol MAX remains the lead throughout the task. The skill can guide delegation but cannot change the active Codex model or unlock unavailable models or agents.
 
 ## Why this setup?
 
-Sol provides strong repository-level coding, integration, and final judgment. Luna is capable of most bounded worker tasks at much lower cost, so exploration and review can run in parallel when their findings will help. A second Sol worker is useful only when a specific hard problem remains after focused Luna work.
+GPT-6.1 Sol provides strong repository-level coding, integration, and final judgment. OpenAI recommends [GPT-6.1 Sol MEDIUM for complex technical work](https://developers.openai.com/api/docs/guides/model-selection), making it a useful starting route for substantive workers. Luna remains the inexpensive option for discovery and settled mechanical work. A Sol HIGH/MAX specialist is useful when a concrete question requires deeper reasoning or a high-risk second opinion.
 
-Cost control comes from choosing useful scopes and the right worker effort, not from lowering the persistent lead's reasoning level. A larger file count does not itself call for a stronger worker.
+Cost control comes from choosing useful scopes and worker effort while keeping the persistent lead at MAX. Consider the cost of completing the task, including lead verification, corrections, and coordination, rather than token price alone. A larger file count does not itself call for a specialist.
 
 ```text
-GPT-6 Sol MAX (persistent lead)
+GPT-6.1 Sol MAX (persistent lead)
         │
         ├── GPT-6 Luna HIGH
         │   ├── repository exploration
         │   ├── call-site discovery
         │   ├── test discovery
-        │   └── dependency analysis
+        │   ├── dependency analysis
+        │   └── settled mechanical edits
         │
-        ├── GPT-6 Luna MAX
+        ├── GPT-6.1 Sol MEDIUM
+        │   ├── bounded implementation
         │   ├── bug investigation
         │   ├── implementation planning
         │   ├── edge cases
         │   ├── regression review
         │   └── adversarial review
         │
-        └── GPT-6 Sol MAX specialist (only when justified)
+        └── GPT-6.1 Sol HIGH/MAX specialist (only when justified)
             ├── architecture
             ├── concurrency
             ├── database behavior
@@ -89,16 +91,16 @@ The branches show available roles, not agents that must all be started. Independ
 
 | Responsibility | Model | Reasoning |
 | --- | --- | --- |
-| Persistent lead, orchestration, integration, final decisions | GPT-6 Sol | MAX |
+| Persistent lead, orchestration, integration, final decisions | GPT-6.1 Sol | MAX |
 | Repository exploration and mechanical analysis | GPT-6 Luna | HIGH |
-| Bug analysis, implementation planning, edge cases, review | GPT-6 Luna | MAX |
-| Difficult concurrency, database, architecture, or unresolved specialist problems | GPT-6 Sol | MAX |
+| Substantive implementation, bug analysis, planning, edge cases, review | GPT-6.1 Sol | MEDIUM |
+| Difficult concurrency, database, architecture, or high-impact specialist questions | GPT-6.1 Sol | HIGH/MAX |
 
 ### Reasoning and specialist escalation
 
-Keep the Sol lead at MAX for every task size. For simple tasks, use fewer workers. Choose Luna HIGH for inexpensive mechanical work and Luna MAX when deeper bounded reasoning could change the outcome.
+Keep the Sol lead at MAX for every task size. For simple tasks, use fewer workers. Choose Luna HIGH for discovery and mechanical work with settled contracts. Start substantive implementation, investigation, planning, and review with Sol MEDIUM.
 
-An additional Sol MAX specialist needs a concrete difficult question: for example, a subtle race, transaction invariant, architecture decision, cross-module state problem, difficult performance issue, or independent second opinion on a high-risk change. The lead decides when Luna findings are insufficient, verifies the specialist's evidence, and retains final ownership.
+An additional Sol HIGH/MAX specialist needs a concrete difficult question: for example, a subtle race, transaction invariant, architecture decision, cross-module state problem, difficult performance issue, or independent second opinion on a high-risk change. Choose HIGH first and MAX when the specific question warrants deeper reasoning. Route complex work directly to Sol; a preliminary Luna attempt is not required. The lead verifies the specialist's evidence and retains final ownership.
 
 ## Task sizing
 
@@ -107,9 +109,9 @@ Worker counts are planning guidance across the whole task, never quotas or simul
 | Size | Examples | Typical delegation |
 | --- | --- | --- |
 | Trivial | Rename, typo, small CSS fix, obvious config change, tiny one-file edit | Usually no worker; optionally one GPT-6 Luna HIGH for useful discovery |
-| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 GPT-6 Luna HIGH/MAX workers; Sol specialist only if unexpectedly difficult |
-| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful GPT-6 Luna HIGH/MAX scopes; optional Sol MAX specialist |
-| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful GPT-6 Luna HIGH/MAX scopes; optional 1–2 Sol MAX specialists |
+| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 useful Luna HIGH or Sol MEDIUM scopes; HIGH/MAX only for a concrete difficult question |
+| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful Luna HIGH or Sol MEDIUM scopes; optional Sol HIGH/MAX specialist |
+| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful Luna HIGH or Sol MEDIUM scopes; optional 1–2 Sol HIGH/MAX specialists |
 
 ## Worker roles
 
@@ -118,9 +120,9 @@ The skill includes reusable roles, selected only when relevant:
 | Recommended route | Roles |
 | --- | --- |
 | GPT-6 Luna HIGH | `repository-explorer`, `call-site-analyzer`, `test-analyzer`, `dependency-analyzer` |
-| GPT-6 Luna MAX | `implementation-planner`, `bug-investigator`, `edge-case-reviewer`, `regression-reviewer`, `adversarial-reviewer` |
-| GPT-6 Sol MAX, when justified | `concurrency-specialist`, `database-specialist`, `architecture-specialist` |
-| GPT-6 Luna HIGH or MAX, according to difficulty | `bounded-implementer` |
+| GPT-6.1 Sol MEDIUM; HIGH/MAX for difficult or high-impact questions | `implementation-planner`, `bug-investigator`, `edge-case-reviewer`, `regression-reviewer`, `adversarial-reviewer` |
+| GPT-6.1 Sol HIGH/MAX, when justified | `concurrency-specialist`, `database-specialist`, `architecture-specialist` |
+| GPT-6 Luna HIGH for settled mechanical edits; GPT-6.1 Sol MEDIUM for substantive implementation | `bounded-implementer` |
 
 Each worker gets a narrow scope, relevant context, a clear objective, allowed edits, and an expected output. Do not duplicate assignments unless an independent second opinion is intentionally useful. See [worker roles](references/roles.md) for bounded role definitions.
 
