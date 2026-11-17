@@ -4,7 +4,7 @@
 
 Cost-efficient multi-agent coding orchestration for Codex.
 
-**GPT-6.1 Sol MAX** owns the task as the persistent lead and final decision-maker. **GPT-6 Luna HIGH** workers handle useful discovery and settled mechanical work. **GPT-6.1 Sol MEDIUM** workers handle substantive implementation, analysis, debugging, and review. Additional **GPT-6.1 Sol HIGH/MAX** specialists are reserved for concrete difficult questions or high-risk second opinions.
+**GPT-6.2 Sol MAX** owns the task as the persistent lead. **GPT-6 Luna HIGH** workers handle discovery and settled mechanical work. **GPT-6.2 Sol MEDIUM** workers handle substantive implementation, analysis, debugging, and review. Use **Sol HIGH/MAX** for difficult bounded questions and **GPT-6.2 Astra HIGH/MAX** for the hardest specialist questions or independent reviews of consequential changes.
 
 The goal is high coding quality without unnecessary worker or context cost.
 
@@ -39,7 +39,7 @@ bunx skills check -g
 Select the active model and reasoning level in Codex:
 
 ```text
-GPT-6.1 Sol
+GPT-6.2 Sol
 Reasoning: MAX
 ```
 
@@ -52,16 +52,16 @@ Implement the requested feature, preserve the existing architecture,
 run the relevant checks, and keep the change focused.
 ```
 
-GPT-6.1 Sol MAX remains the lead throughout the task. The skill can guide delegation but cannot change the active Codex model or unlock unavailable models or agents.
+The active model leads throughout the task. For an unusually demanding end-to-end task, you can select Astra as the lead in Codex before starting. MAX gives the lead more reasoning time. Ultra can proactively delegate work and suits tasks with useful parallel scopes. [Codex model and reasoning guidance](https://learn.chatgpt.com/docs/models#know-when-to-use-max-or-ultra)
 
 ## Why this setup?
 
-GPT-6.1 Sol provides strong repository-level coding, integration, and final judgment. OpenAI recommends [GPT-6.1 Sol MEDIUM for complex technical work](https://developers.openai.com/api/docs/guides/model-selection), making it a useful starting route for substantive workers. Luna remains the inexpensive option for discovery and settled mechanical work. A Sol HIGH/MAX specialist is useful when a concrete question requires deeper reasoning or a high-risk second opinion.
+GPT-6.2 Sol is suited to everyday coding and uses fewer Codex credits per token than Astra at Standard speed. Luna is the efficient option for focused, repeatable work. Astra is suited to demanding work such as tracing a failure across services. [Codex model guidance](https://learn.chatgpt.com/docs/models#recommended-models)
 
 Cost control comes from choosing useful scopes and worker effort while keeping the persistent lead at MAX. Consider the cost of completing the task, including lead verification, corrections, and coordination, rather than token price alone. A larger file count does not itself call for a specialist.
 
 ```text
-GPT-6.1 Sol MAX (persistent lead)
+GPT-6.2 Sol MAX (persistent lead)
         │
         ├── GPT-6 Luna HIGH
         │   ├── repository exploration
@@ -70,7 +70,7 @@ GPT-6.1 Sol MAX (persistent lead)
         │   ├── dependency analysis
         │   └── settled mechanical edits
         │
-        ├── GPT-6.1 Sol MEDIUM
+        ├── GPT-6.2 Sol MEDIUM
         │   ├── bounded implementation
         │   ├── bug investigation
         │   ├── implementation planning
@@ -78,11 +78,11 @@ GPT-6.1 Sol MAX (persistent lead)
         │   ├── regression review
         │   └── adversarial review
         │
-        └── GPT-6.1 Sol HIGH/MAX specialist (only when justified)
-            ├── architecture
-            ├── concurrency
-            ├── database behavior
-            └── unresolved hard problems
+        ├── GPT-6.2 Sol HIGH/MAX for difficult bounded questions
+        │
+        └── GPT-6.2 Astra HIGH/MAX for the hardest questions
+            ├── unresolved cross-module failures
+            └── independent review of consequential changes
 ```
 
 The branches show available roles, not agents that must all be started. Independent scopes may run in parallel; dependent work waits for its inputs.
@@ -91,16 +91,17 @@ The branches show available roles, not agents that must all be started. Independ
 
 | Responsibility | Model | Reasoning |
 | --- | --- | --- |
-| Persistent lead, orchestration, integration, final decisions | GPT-6.1 Sol | MAX |
+| Persistent lead, orchestration, integration, final decisions | GPT-6.2 Sol | MAX |
 | Repository exploration and mechanical analysis | GPT-6 Luna | HIGH |
-| Substantive implementation, bug analysis, planning, edge cases, review | GPT-6.1 Sol | MEDIUM |
-| Difficult concurrency, database, architecture, or high-impact specialist questions | GPT-6.1 Sol | HIGH/MAX |
+| Substantive implementation, bug analysis, planning, edge cases, review | GPT-6.2 Sol | MEDIUM |
+| Difficult bounded question | GPT-6.2 Sol | HIGH/MAX |
+| Hardest specialist questions and high-impact second opinions | GPT-6.2 Astra | HIGH/MAX |
 
 ### Reasoning and specialist escalation
 
 Keep the Sol lead at MAX for every task size. For simple tasks, use fewer workers. Choose Luna HIGH for discovery and mechanical work with settled contracts. Start substantive implementation, investigation, planning, and review with Sol MEDIUM.
 
-An additional Sol HIGH/MAX specialist needs a concrete difficult question: for example, a subtle race, transaction invariant, architecture decision, cross-module state problem, difficult performance issue, or independent second opinion on a high-risk change. Choose HIGH first and MAX when the specific question warrants deeper reasoning. Route complex work directly to Sol; a preliminary Luna attempt is not required. The lead verifies the specialist's evidence and retains final ownership.
+Use Sol HIGH/MAX when a bounded question calls for deeper reasoning. Use Astra HIGH for a focused second opinion when the consequences of a missed defect justify the cost. Choose Astra MAX when depth matters more than time or usage. A hard question or high-impact review can go directly to Astra. The lead verifies each specialist's evidence and retains final ownership.
 
 ## Task sizing
 
@@ -109,9 +110,9 @@ Worker counts are planning guidance across the whole task, never quotas or simul
 | Size | Examples | Typical delegation |
 | --- | --- | --- |
 | Trivial | Rename, typo, small CSS fix, obvious config change, tiny one-file edit | Usually no worker; optionally one GPT-6 Luna HIGH for useful discovery |
-| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 useful Luna HIGH or Sol MEDIUM scopes; HIGH/MAX only for a concrete difficult question |
-| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful Luna HIGH or Sol MEDIUM scopes; optional Sol HIGH/MAX specialist |
-| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful Luna HIGH or Sol MEDIUM scopes; optional 1–2 Sol HIGH/MAX specialists |
+| Small | Isolated bugfix, small component or endpoint, focused test change | Roughly 1–3 useful Luna HIGH or Sol MEDIUM scopes. Use a specialist for a concrete difficult question. |
+| Medium | Feature, CRUD flow, module refactor, API + UI + tests | Roughly 3–6 useful Luna HIGH or Sol MEDIUM scopes, with a specialist if justified |
+| Large | Broad refactor, repository-wide migration, new subsystem, complex regression | Roughly 6–10 useful Luna HIGH or Sol MEDIUM scopes, with 1–2 specialists if justified |
 
 ## Worker roles
 
@@ -120,9 +121,9 @@ The skill includes reusable roles, selected only when relevant:
 | Recommended route | Roles |
 | --- | --- |
 | GPT-6 Luna HIGH | `repository-explorer`, `call-site-analyzer`, `test-analyzer`, `dependency-analyzer` |
-| GPT-6.1 Sol MEDIUM; HIGH/MAX for difficult or high-impact questions | `implementation-planner`, `bug-investigator`, `edge-case-reviewer`, `regression-reviewer`, `adversarial-reviewer` |
-| GPT-6.1 Sol HIGH/MAX, when justified | `concurrency-specialist`, `database-specialist`, `architecture-specialist` |
-| GPT-6 Luna HIGH for settled mechanical edits; GPT-6.1 Sol MEDIUM for substantive implementation | `bounded-implementer` |
+| GPT-6.2 Sol MEDIUM | `implementation-planner`, `bug-investigator`, `edge-case-reviewer`, `regression-reviewer`, `adversarial-reviewer` |
+| Sol or Astra HIGH/MAX according to the model strategy | `concurrency-specialist`, `database-specialist`, `architecture-specialist` |
+| GPT-6 Luna HIGH for settled mechanical edits or GPT-6.2 Sol MEDIUM for substantive implementation | `bounded-implementer` |
 
 Each worker gets a narrow scope, relevant context, a clear objective, allowed edits, and an expected output. Do not duplicate assignments unless an independent second opinion is intentionally useful. See [worker roles](references/roles.md) for bounded role definitions.
 
