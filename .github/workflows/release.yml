@@ -35,8 +35,13 @@ jobs:
       - name: Validate required files
         shell: bash
         run: |
-          test -f SKILL.md || {
-            echo "::error::SKILL.md is missing"
+          test -f codex/hybrid-coding/SKILL.md || {
+            echo "::error::Codex SKILL.md is missing"
+            exit 1
+          }
+
+          test -f claude/skills/hybrid-coding-claude/SKILL.md || {
+            echo "::error::Claude Code SKILL.md is missing"
             exit 1
           }
 
@@ -50,7 +55,12 @@ jobs:
             exit 1
           }
 
-      - name: Validate skill discovery
+      - name: Validate Codex skill discovery
         shell: bash
         run: |
-          npx -y skills@latest add . --list
+          npx -y skills@latest add ./codex/hybrid-coding --list
+
+      - name: Validate Claude Code plugin and marketplace
+        shell: bash
+        run: |
+          npx -y --package @anthropic-ai/claude-code@2.1.329 claude plugin validate .
