@@ -1,0 +1,14 @@
+{
+  "name": "rentnerkev-hybrid-coding",
+  "description": "RentnerKev's hybrid coding plugin for Claude Code.",
+  "owner": {
+    "name": "RentnerKev"
+  },
+  "plugins": [
+    {
+      "name": "hybrid-coding",
+      "source": "./claude",
+      "description": "Selective multi-agent coding orchestration for Claude Code."
+    }
+  ]
+}
